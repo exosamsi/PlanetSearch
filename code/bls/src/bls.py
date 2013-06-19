@@ -1,10 +1,8 @@
 from __future__ import division, print_function
+from time import time
 
 import numpy as np
 import matplotlib.pyplot as pl
-
-from time import time
-from numpy.ma import masked_array
 
 from blsf import bls
 
@@ -34,7 +32,7 @@ class BLS(object):
 
 class BLSResult(object):
     def __init__(self, p, bper, bpow, depth, qtran, in1, in2):
-        self.p = masked_array(p, p<1e-9)
+        self.p = p 
         self.bper = bper
         self.bpow = bpow
         self.bsde = (bpow - self.p.mean())/(self.p.std()) or 0

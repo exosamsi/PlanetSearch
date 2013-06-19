@@ -146,72 +146,70 @@ contains
     do jf=1,nf
        f0=fmin+df*(jf-1)
        p0=1.0d0/f0
+       
+       !!======================================================
+       !!     Compute folded time series with  *p0*  period
+       !!======================================================
+       y   = 0.0d0
+       ws  = 0.0d0
 
-       if ((abs(.5d0-mod(p0+.5d0,1.d0)) > 1d-1) .and. (abs(.5d0-mod(f0-.5d0,1.d0)) > 1d-1)) then
-          !!======================================================
-          !!     Compute folded time series with  *p0*  period
-          !!======================================================
-          y   = 0.0d0
-          ws  = 0.0d0
+       do i=1,n
+          ph     = mod(u(i)*f0, 1.0d0)
+          j      = 1 + int(nb*ph)
+          ws(j)  = ws(j) + w(i)
+          y(j)   = y(j) + w(i)*v(i)
+       end do
 
-          do i=1,n
-             ph     = mod(u(i)*f0, 1.0d0)
-             j      = 1 + int(nb*ph)
-             ws(j)  = ws(j) + w(i)
-             y(j)   = y(j) + w(i)*v(i)
-          end do
+       !!-----------------------------------------------
+       !!     Extend the arrays  ibi()  and  y() beyond  
+       !!     nb   by  wrapping
+       !!
+       do j=nb+1, nb+kma
+          y(j)   = y(j-nb)
+          ws(j)  = ws(j-nb)
+       end do
+       !!-----------------------------------------------   
 
-          !!-----------------------------------------------
-          !!     Extend the arrays  ibi()  and  y() beyond  
-          !!     nb   by  wrapping
-          !!
-          do j=nb+1, nb+kma
-             y(j)   = y(j-nb)
-             ws(j)  = ws(j-nb)
-          end do
-          !!-----------------------------------------------   
+       !!===============================================
+       !!     Compute BLS statistics for this period
+       !!===============================================
+       power=0.0d0
 
-          !!===============================================
-          !!     Compute BLS statistics for this period
-          !!===============================================
-          power=0.0d0
+       do i=1,nb
+          s     = 0.0d0
+          k     = 0
+          ww    = 0.0d0 
+          do j=i, i+kma
+             k     = k+1
+             ww    = ww+ws(j)
+             s     = s+y(j)
+             if ((k > kmi) .and. (ww>qmi) .and. (ww > k*minw)) then
+                pow   = s*s/(ww*(1.d0-ww))
 
-          do i=1,nb
-             s     = 0.0d0
-             k     = 0
-             ww    = 0.0d0 
-             do j=i, i+kma
-                k     = k+1
-                ww    = ww+ws(j)
-                s     = s+y(j)
-                if ((k > kmi) .and. (ww>qmi) .and. (ww > k*minw)) then
-                   pow   = s*s/(ww*(1.d0-ww))
-
-                   if((pow > power) .and. (s<0.0d0)) then
-                      power = pow
-                      jn1   = i
-                      jn2   = j
-                      rn3   = ww
-                      s3    = s
-                   end if
+                if((pow > power) .and. (s<0.0d0)) then
+                   power = pow
+                   jn1   = i
+                   jn2   = j
+                   rn3   = ww
+                   s3    = s
                 end if
-             end do
+             end if
           end do
+       end do
 
-          power = sqrt(power)
-          p(jf) = power
+       power = sqrt(power)
+       p(jf) = power
 
-          !$omp critical
-          if(power > bpow) then
-             bpow  =  power
-             in1   =  jn1
-             in2   =  jn2
-             qtran =  rn3
-             depth = -s3*1.d0/(rn3*(1.d0-rn3))
-             bper  =  p0
-          end if
-          !$omp end critical
+       !$omp critical
+       if(power > bpow) then
+          bpow  =  power
+          in1   =  jn1
+          in2   =  jn2
+          qtran =  rn3
+          depth = -s3*1.d0/(rn3*(1.d0-rn3))
+          bper  =  p0
        end if
+       !$omp end critical
     end do
     !$omp end parallel do
 

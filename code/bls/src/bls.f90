@@ -9,26 +9,21 @@ contains
     real(8), intent(in) :: f, pc
     real(8), intent(out), dimension(nbin) :: bf, be
 
-    integer :: i, j, id(n)
-    real(8) :: ph, w(n), dw(n)
+    integer :: i, id(n)
+    real(8) :: w(n), dw(n)
     logical :: mask(n)
 
     bf  = 0.d0
     be  = 0.d0
 
     w   = e**(-2)/sum(e**(-2))
+    id  = 1 + int(mod((t-t(1))*f + (0.5d0-pc), 1.d0) * nbin)
 
-    !! = 1 + (ph * nbin)
-    id = 1 + int(mod((t-t(1))*f + (0.5d0-pc), 1.d0) * nbin)
-
-    dw = d*w
+    dw  = d*w
     do i=1,nbin
        mask  = id == i
-       bf(i) = sum(dw, mask=mask) / sum(w, mask=mask) !real(count(mask),8)
+       bf(i) = sum(dw, mask=mask) / sum(w, mask=mask)
        be(i) = sqrt(sum(e**2, mask=mask) / real(count(mask),8))
-
-       !be(i) = sqrt(sum((pack(dw,mask) - bf(i))**2) / (sum(w, mask=mask)**2-1.d0)) !(real(count(mask),8)**2-1.d0))
-       !be(i) = sqrt(sum((pack(dw,mask) - bf(i))**2) / (real(count(mask),8)**2-1.d0))
     end do
 
   end subroutine bin
@@ -109,7 +104,7 @@ contains
     real(8), intent(out), dimension(nf) :: p
 
     integer :: kmi, kma, i, j, k, jf, jn1, jn2
-    real(8) :: rn, rn1, rn3, s, s3, ph, pow, power, f0, p0, ww, minw
+    real(8) :: rn, rn3, s, s3, ph, pow, power, f0, p0, ww, minw
     real(8), dimension(n) :: u, v, w
 
     real(8), dimension(:), allocatable :: y, ws
@@ -146,7 +141,7 @@ contains
     !!     Start period search     *
     !!******************************
     !$omp parallel do default(none) &
-    !$omp private(i,j,k,s,ws,ww,jf,f0,p0,y,ph,pow,power,rn1,jn1,jn2,rn3,s3) &
+    !$omp private(i,j,k,s,ws,ww,jf,f0,p0,y,ph,pow,power,jn1,jn2,rn3,s3) &
     !$omp shared(p,u,v,w,n,nf,nb,df,fmin,kma,kmi,qmi,minw,bpow,rn,in1,in2,qtran,depth,bper)
     do jf=1,nf
        f0=fmin+df*(jf-1)

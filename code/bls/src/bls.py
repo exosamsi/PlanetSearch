@@ -29,9 +29,8 @@ class BLS(object):
             self.freq_range   = np.array([self.fmin, self.fmin+self.nf*self.df])
             self.period_range = np.flipud(1/self.freq_range)
             
-        print (self.freq_range, self.df)
-        print (self.period_range)
-        exit()
+        if 'q_range' in kwargs.keys():
+            self.qmin, self.qmax = kwargs.get('q_range')
 
 
     def __call__(self):

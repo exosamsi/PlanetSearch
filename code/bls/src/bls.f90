@@ -112,7 +112,6 @@ contains
     if(fmin < 1.0d0/(t(n)-t(1))) then
        write(*,*) ' fmin < 1/T !!'
        write(*,*) t(1), t(n)
-       stop
     end if
     
     minw = 0.75d0 / real(nb,8)

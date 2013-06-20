@@ -14,10 +14,24 @@ class BLS(object):
 
         self.fmin = kwargs.get('fmin', 0.1)
         self.nf   = kwargs.get('nf',  1000)
-        self.df   = kwargs.get('df',  1e-3)
+        self.df   = kwargs.get('df',  1e-6)
         self.nbin = kwargs.get('nbin', 1000)
         self.qmin = kwargs.get('qmin', 0.01)
         self.qmax = kwargs.get('qmax', 0.10)
+
+        if 'period_range' in kwargs.keys():
+            self.period_range = np.array(kwargs.get('period_range'))
+            self.freq_range = np.flipud(1/self.period_range)
+            self.fmin = self.freq_range[0]
+            self.df = np.diff(self.freq_range) / self.nf
+
+        else:
+            self.freq_range   = np.array([self.fmin, self.fmin+self.nf*self.df])
+            self.period_range = np.flipud(1/self.freq_range)
+            
+        print (self.freq_range, self.df)
+        print (self.period_range)
+        exit()
 
 
     def __call__(self):
@@ -42,6 +56,6 @@ class BLSResult(object):
         self.in2 = in2
         
     def __str__(self):
-        return 'Power {pw:6.4f}   Period {pr:6.3f}   Freq {fr:6.3f}   Depth {df:6.3f}   qtran {qt:5.3f}'.format(pr=self.bper, fr=1/self.bper, pw=self.bpow, df=self.depth, qt=self.qtran)
+        return 'Power {pw:8.6f}   sde {sde:6.3f}   Period {pr:6.3f}   Freq {fr:6.3f}   Depth {df:6.3f}   qtran {qt:5.3f}'.format(pr=self.bper, sde=self.bsde, fr=1/self.bper, pw=self.bpow, df=self.depth, qt=self.qtran)
 
     def get_sde(self): return (self.p - self.p.mean()) / self.p.std()

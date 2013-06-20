@@ -17,9 +17,20 @@ With a bit less modern gcc
 Usage
 -----
 
+Import the BLS class
+
 	from pybls import BLS
-	...
+
+Create an instance
+
+	bls = BLS(time, flux, error, period_range=(300,400), nf=4500, nbin=2000, qmin=0.001, qmax=0.01)
+
+or
+
 	bls = BLS(time, flux, error, fmin=0.00222, nf=4500, df=2e-7, nbin=2000, qmin=0.001, qmax=0.01)
+	
+run the search	
+	
 	res = bls()
 
 The abovementioned parameters search for periods between 320 and 450 days, and seem to work well for super-Earths.
